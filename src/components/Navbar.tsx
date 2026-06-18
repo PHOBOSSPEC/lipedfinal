@@ -19,7 +19,7 @@ export function Navbar() {
     <>
       <Link to="/" activeOptions={{ exact: true }} className={linkBase} activeProps={activeProps} onClick={() => setOpen(false)}>Início</Link>
       <Link to="/eventos" className={linkBase} activeProps={activeProps} onClick={() => setOpen(false)}>Eventos</Link>
-      <Link to="/artigos" className={linkBase} activeProps={activeProps} onClick={() => setOpen(false)}>Artigos</Link>
+      <Link to="/trabalhos" className={linkBase} activeProps={activeProps} onClick={() => setOpen(false)}>Trabalhos</Link>
       <Link to="/coppa" className="px-3 py-2 text-sm font-semibold rounded-md bg-accent text-accent-foreground hover:opacity-90 transition" onClick={() => setOpen(false)}>III COPPA</Link>
       {isAdmin && (
         <Link to="/admin" className={linkBase} activeProps={activeProps} onClick={() => setOpen(false)}>
