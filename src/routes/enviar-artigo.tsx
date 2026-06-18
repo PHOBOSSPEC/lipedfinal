@@ -1,8 +1,7 @@
 import { createFileRoute, Link } from "@tanstack/react-router";
-import { useState, useMemo } from "react";
+import { useState } from "react";
 import { useServerFn } from "@tanstack/react-start";
 import { z } from "zod";
-import { supabase } from "@/lib/db";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -66,6 +65,7 @@ const CAMPOS_FORA_DO_CORPO: CampoKey[] = ["referencias"];
 const contarPalavras = (s: string) =>
   s.trim() ? s.trim().split(/\s+/).filter(Boolean).length : 0;
 
+// Schema atualizado refletindo as novas obrigatoriedades
 const schemaBase = z.object({
   titulo: z.string().trim().min(3, "Título muito curto").max(TITULO_MAX, `Título deve ter no máximo ${TITULO_MAX} caracteres`),
   palavras_chave: z.string().trim().min(2, "Informe as palavras-chave").max(500),
@@ -73,18 +73,31 @@ const schemaBase = z.object({
   autor_sobrenome: z.string().trim().min(1, "Informe o sobrenome").max(120),
   autor_email: z.string().trim().email("E-mail inválido").max(255),
   autor_telefone: z.string().trim().max(30).optional(),
+  autor_universidade: z.string().trim().min(1, "Informe a sua universidade").max(150),
+  autor_municipio: z.string().trim().min(1, "Informe o seu município").max(100),
+  autor_uf: z.string().trim().min(2, "UF inválida").max(2),
 });
 
-type Coautor = { nome: string; sobrenome: string };
+type Coautor = { 
+  nome: string; 
+  sobrenome: string; 
+  universidade: string; 
+  municipio: string; 
+  uf: string; 
+};
 
 function EnviarArtigoPage() {
   const { value: settings, loading } = useSetting<ArtigosCoppaSettings>("artigos_coppa", DEFAULT_ARTIGOS);
   const enviar = useServerFn(enviarArtigoCoppa);
   const [tipo, setTipo] = useState<string>("");
+  
+  // Estado do formulário atualizado com os novos campos do autor
   const [form, setForm] = useState({
     titulo: "", palavras_chave: "",
     autor_nome: "", autor_sobrenome: "", autor_email: "", autor_telefone: "",
+    autor_universidade: "", autor_municipio: "", autor_uf: "",
   });
+  
   const [campos, setCampos] = useState<Record<string, string>>({});
   const [coautores, setCoautores] = useState<Coautor[]>([]);
   const [submitting, setSubmitting] = useState(false);
@@ -95,9 +108,10 @@ function EnviarArtigoPage() {
   const camposCorpo = tipoCfg ? tipoCfg.campos.filter((k) => !CAMPOS_FORA_DO_CORPO.includes(k)) : [];
   const palavrasCorpo = camposCorpo.reduce((acc, k) => acc + contarPalavras(campos[k] ?? ""), 0);
 
+  // Inicialização atualizada para novos coautores
   const addCoautor = () => {
     if (coautores.length < MAX_COAUTORES) {
-      setCoautores([...coautores, { nome: "", sobrenome: "" }]);
+      setCoautores([...coautores, { nome: "", sobrenome: "", universidade: "", municipio: "", uf: "" }]);
     }
   };
 
@@ -125,8 +139,24 @@ function EnviarArtigoPage() {
       return toast.error(`O corpo do resumo excede ${CORPO_MAX_PALAVRAS} palavras.`);
     }
 
+    // Validação extra manual para garantir que se o coautor foi adicionado, os novos dados locais estão preenchidos
+    for (let idx = 0; idx < coautores.length; idx++) {
+      const c = coautores[idx];
+      if (c.nome.trim() || c.sobrenome.trim()) {
+        if (!c.universidade.trim() || !c.municipio.trim() || c.uf.trim().length !== 2) {
+          return toast.error(`Preencha todos os dados de instituição/localização do Coautor #${idx + 1}`);
+        }
+      }
+    }
+
     const coautoresFiltrados = coautores
-      .map((c) => ({ nome: c.nome.trim(), sobrenome: c.sobrenome.trim() }))
+      .map((c) => ({ 
+        nome: c.nome.trim(), 
+        sobrenome: c.sobrenome.trim(),
+        universidade: c.universidade.trim(),
+        municipio: c.municipio.trim(),
+        uf: c.uf.trim().toUpperCase()
+      }))
       .filter((c) => c.nome && c.sobrenome);
 
     const blocos: string[] = [`TIPO: ${tipoCfg.label}`, ""];
@@ -150,9 +180,12 @@ function EnviarArtigoPage() {
           autor_sobrenome: parsed.data.autor_sobrenome,
           autor_email: parsed.data.autor_email,
           autor_telefone: parsed.data.autor_telefone || "",
+          autor_universidade: parsed.data.autor_universidade,
+          autor_municipio: parsed.data.autor_municipio,
+          autor_uf: parsed.data.autor_uf,
           coautores: coautoresFiltrados,
-          arquivo_url: "", // Removido
-          arquivo_nome: "", // Removido
+          arquivo_url: "", 
+          arquivo_nome: "", 
         },
       });
       setSuccess(true);
@@ -254,6 +287,7 @@ function EnviarArtigoPage() {
               </div>
             )}
 
+            {/* SEÇÃO DO AUTOR PRINCIPAL - Atualizada com novas linhas de input */}
             <div className="rounded-lg border border-border p-4 space-y-4">
               <h3 className="font-semibold text-primary">Autor principal</h3>
               <div className="grid gap-4 md:grid-cols-2">
@@ -280,8 +314,28 @@ function EnviarArtigoPage() {
                     onChange={(e) => setForm({ ...form, autor_telefone: e.target.value })} />
                 </div>
               </div>
+              
+              {/* Novos campos adicionados para o Autor */}
+              <div className="space-y-2">
+                <Label htmlFor="auniversidade">Universidade / Instituição *</Label>
+                <Input id="auniversidade" value={form.autor_universidade} maxLength={150} placeholder="Ex: USP, Unicamp, etc."
+                  onChange={(e) => setForm({ ...form, autor_universidade: e.target.value })} required />
+              </div>
+              <div className="grid gap-4 grid-cols-3">
+                <div className="col-span-2 space-y-2">
+                  <Label htmlFor="amunicipio">Município *</Label>
+                  <Input id="amunicipio" value={form.autor_municipio} maxLength={100}
+                    onChange={(e) => setForm({ ...form, autor_municipio: e.target.value })} required />
+                </div>
+                <div className="space-y-2">
+                  <Label htmlFor="auf">UF *</Label>
+                  <Input id="auf" value={form.autor_uf} maxLength={2} placeholder="EX: SP"
+                    onChange={(e) => setForm({ ...form, autor_uf: e.target.value.slice(0, 2) })} required />
+                </div>
+              </div>
             </div>
 
+            {/* SEÇÃO DOS COAUTORES - Atualizada com novos campos dinâmicos */}
             <div className="rounded-lg border border-border p-4 space-y-3">
               <div className="flex items-center justify-between">
                 <h3 className="font-semibold text-primary">Coautores ({coautores.length}/{MAX_COAUTORES})</h3>
@@ -290,18 +344,41 @@ function EnviarArtigoPage() {
                 </Button>
               </div>
               {coautores.map((c, i) => (
-                <div key={i} className="grid grid-cols-[1fr,1fr,auto] gap-2 items-end">
-                  <div>
-                    <Label className="text-xs">Nome</Label>
-                    <Input value={c.nome} maxLength={120} onChange={(e) => updateCoautor(i, "nome", e.target.value)} />
+                <div key={i} className="space-y-3 p-3 bg-muted/30 rounded-md border border-dashed border-border relative">
+                  <div className="absolute right-2 top-2">
+                    <Button type="button" size="icon" variant="ghost" className="h-7 w-7" onClick={() => removeCoautor(i)}>
+                      <Trash2 className="h-4 w-4 text-destructive" />
+                    </Button>
                   </div>
-                  <div>
-                    <Label className="text-xs">Sobrenome</Label>
-                    <Input value={c.sobrenome} maxLength={120} onChange={(e) => updateCoautor(i, "sobrenome", e.target.value)} />
+
+                  <span className="text-xs font-semibold text-muted-foreground block mb-1">Coautor #{i + 1}</span>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <div>
+                      <Label className="text-xs">Nome *</Label>
+                      <Input value={c.nome} maxLength={120} onChange={(e) => updateCoautor(i, "nome", e.target.value)} required />
+                    </div>
+                    <div>
+                      <Label className="text-xs">Sobrenome *</Label>
+                      <Input value={c.sobrenome} maxLength={120} onChange={(e) => updateCoautor(i, "sobrenome", e.target.value)} required />
+                    </div>
                   </div>
-                  <Button type="button" size="icon" variant="ghost" onClick={() => removeCoautor(i)}>
-                    <Trash2 className="h-4 w-4 text-destructive" />
-                  </Button>
+
+                  <div className="space-y-1">
+                    <Label className="text-xs">Universidade / Instituição *</Label>
+                    <Input value={c.universidade} maxLength={150} onChange={(e) => updateCoautor(i, "universidade", e.target.value)} required />
+                  </div>
+
+                  <div className="grid grid-cols-3 gap-2">
+                    <div className="col-span-2">
+                      <Label className="text-xs">Município *</Label>
+                      <Input value={c.municipio} maxLength={100} onChange={(e) => updateCoautor(i, "municipio", e.target.value)} required />
+                    </div>
+                    <div>
+                      <Label className="text-xs">UF *</Label>
+                      <Input value={c.uf} maxLength={2} placeholder="SP" onChange={(e) => updateCoautor(i, "uf", e.target.value.slice(0, 2))} required />
+                    </div>
+                  </div>
                 </div>
               ))}
             </div>
