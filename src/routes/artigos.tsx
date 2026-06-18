@@ -5,10 +5,10 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
 import { FileText, Loader2, Search } from "lucide-react";
 
-export const Route = createFileRoute("/artigos")({
+export const Route = createFileRoute("/trabalhos")({
   head: () => ({
     meta: [
-      { title: "Artigos Científicos — Liga de Pediatria Unioeste" },
+      { title: "Trabalhos Científicos — Liga de Pediatria Unioeste" },
       { name: "description", content: "Artigos científicos publicados pela Liga de Pediatria da Unioeste." },
     ],
   }),
