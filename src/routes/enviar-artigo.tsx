@@ -281,7 +281,7 @@ function EnviarArtigoPage() {
                 <div className="space-y-2">
                   <Label htmlFor="palavras_chave">Palavras-chave *</Label>
                   <Input id="palavras_chave" value={form.palavras_chave} maxLength={500}
-                    placeholder="Separadas por vírgula"
+                    placeholder="Separadas por ponto e vírgula (;)"
                     onChange={(e) => setForm({ ...form, palavras_chave: e.target.value })} required />
                 </div>
               </div>
