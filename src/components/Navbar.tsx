@@ -43,7 +43,7 @@ export function Navbar() {
       <div className="container mx-auto flex h-16 items-center justify-between px-4">
         <Link to="/" className="flex items-center gap-2 text-primary" onClick={() => setOpen(false)}>
           <img src={logoUrl} alt="LIPED" className="h-10 w-10 object-contain rounded-full bg-primary/15 ring-2 ring-primary/40 p-1" />
-          <span className="font-bold tracking-tight text-sm md:text-base">Liga de Pediatria · Unioeste</span>
+          <span className="font-bold tracking-tight text-sm md:text-base">LIPED · Unioeste</span>
         </Link>
 
         <nav className="hidden md:flex items-center gap-1">{links}</nav>
