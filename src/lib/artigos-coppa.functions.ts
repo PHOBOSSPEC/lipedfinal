@@ -1,16 +1,14 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
-// 1. Atualizado para incluir universidade, municipio e uf no coautor
 const coautorSchema = z.object({
   nome: z.string().trim().min(1).max(120),
   sobrenome: z.string().trim().min(1).max(120),
-  universidade: z.string().trim().min(1, "Informe a universidade do coautor").max(150),
-  municipio: z.string().trim().min(1, "Informe o município do coautor").max(100),
-  uf: z.string().trim().min(2, "UF inválida").max(2),
+  universidade: z.string().trim().min(1).max(150),
+  municipio: z.string().trim().min(1).max(100),
+  uf: z.string().trim().min(2).max(2),
 });
 
-// 2. Atualizado para incluir universidade, municipio e uf no autor principal
 const submissaoSchema = z.object({
   titulo: z.string().trim().min(3).max(300),
   resumo: z.string().trim().max(60000).optional().default(""),
@@ -19,15 +17,14 @@ const submissaoSchema = z.object({
   autor_sobrenome: z.string().trim().min(1).max(120),
   autor_email: z.string().trim().email().max(255),
   autor_telefone: z.string().trim().max(30).optional().default(""),
-  autor_universidade: z.string().trim().min(1, "Informe a sua universidade").max(150),
-  autor_municipio: z.string().trim().min(1, "Informe o seu município").max(100),
-  autor_uf: z.string().trim().min(2, "UF inválida").max(2),
+  autor_universidade: z.string().trim().min(1).max(150),
+  autor_municipio: z.string().trim().min(1).max(100),
+  autor_uf: z.string().trim().min(2).max(2),
   coautores: z.array(coautorSchema).max(15).default([]),
   arquivo_url: z.string().trim().max(2000).optional().default(""),
   arquivo_nome: z.string().trim().max(255).optional().default(""),
 });
 
-// 3. Cabeçalho atualizado com as novas colunas para o Autor
 const CABECALHO = [
   "Data/Hora", "Tipo", "Título", "Autor", "E-mail", "Telefone",
   "Autor - Universidade", "Autor - Município", "Autor - UF",
@@ -77,58 +74,37 @@ export const enviarArtigoCoppa = createServerFn({ method: "POST" })
     const spreadsheetId = process.env.GOOGLE_SHEETS_ID;
     if (!spreadsheetId) throw new Error("GOOGLE_SHEETS_ID ausente");
 
-    // 1) Salva no banco de dados (Supabase)
-    // ATENÇÃO: Certifique-se de criar essas colunas na tabela do Supabase se for usá-las lá!
-    const mod = await import("@/integrations/supabase/client.server");
-    const supabaseAdmin: any = mod.supabaseAdmin;
-    
-    const { data: inserted, error: insertErr } = await supabaseAdmin
-      .from("submissoes_artigos_coppa")
-      .insert({
-        titulo: data.titulo, 
-        resumo: data.resumo || null,
-        autor_nome: data.autor_nome, 
-        autor_sobrenome: data.autor_sobrenome,
-        autor_email: data.autor_email, 
-        autor_telefone: data.autor_telefone || null,
-        autor_universidade: data.autor_universidade, // Nova coluna
-        autor_municipio: data.autor_municipio,       // Nova coluna
-        autor_uf: data.autor_uf,                     // Nova coluna
-        coautores: data.coautores, // O objeto JSON aqui já vai conter os novos campos do coautor
-        arquivo_url: data.arquivo_url || null, 
-        arquivo_nome: data.arquivo_nome || null,
-      })
-      .select("id, created_at").single();
+    // SUPABASE REMOVIDO DAQUI COMPLETAMENTE
 
-    if (insertErr) throw new Error(`Falha ao salvar no Supabase: ${insertErr.message}`);
+    // Gerando dados locais já que não vêm mais do banco de dados
+    const geradoId = crypto.randomUUID();
+    const dataHoraAtual = new Date().toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" });
 
     try {
-      // 2) Escreve na planilha do Google
       const sheetsApi = await getSheets();
       const sheetName = sheetNameFor(data.tipo_label);
       
       await ensureSheet(sheetsApi, spreadsheetId, sheetName);
       
-      // Formata os coautores incluindo a universidade e localidade de cada um
       const coautoresStr = data.coautores
         .map((c) => `${c.nome} ${c.sobrenome} (${c.universidade} - ${c.municipio}/${c.uf.toUpperCase()})`)
         .join("; ");
 
       const row = [
-        new Date(inserted!.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
+        dataHoraAtual,
         data.tipo_label, 
         data.titulo,
         `${data.autor_nome} ${data.autor_sobrenome}`,
         data.autor_email, 
         data.autor_telefone || "",
-        data.autor_universidade, // Inserido na planilha
-        data.autor_municipio,    // Inserido na planilha
-        data.autor_uf.toUpperCase(), // Inserido na planilha
+        data.autor_universidade, 
+        data.autor_municipio,    
+        data.autor_uf.toUpperCase(), 
         coautoresStr, 
         data.resumo || "",
         data.arquivo_url || "", 
         data.arquivo_nome || "", 
-        inserted!.id,
+        geradoId,
       ];
       
       await sheetsApi.spreadsheets.values.append({
@@ -139,13 +115,10 @@ export const enviarArtigoCoppa = createServerFn({ method: "POST" })
         requestBody: { values: [row] },
       });
 
-      // 3) Atualiza o banco
-      await supabaseAdmin.from("submissoes_artigos_coppa")
-        .update({ enviado_planilha: true }).eq("id", inserted!.id);
-
     } catch (googleError: any) {
       console.error("Erro Google Sheets:", googleError?.response?.data || googleError.message);
+      throw new Error(`Falha ao salvar na Planilha: ${googleError.message}`);
     }
 
-    return { ok: true, id: inserted!.id, aba: data.tipo_label };
+    return { ok: true, id: geradoId, aba: data.tipo_label };
   });
