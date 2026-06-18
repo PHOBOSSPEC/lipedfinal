@@ -49,7 +49,7 @@ function HomePage() {
               <HeartPulse className="h-3.5 w-3.5" /> Cuidando do futuro da pediatria
             </span>
             <h1 className="mt-5 text-4xl md:text-6xl font-bold tracking-tight drop-shadow">
-              Liga Acadêmica de Pediatria — Unioeste Campus Cascavel
+              Liga Acadêmica de Pediatria Unioeste Campus Cascavel
             </h1>
             <p className="mt-5 text-lg md:text-xl text-primary-foreground/95">
               Promovendo educação, pesquisa e assistência humanizada à saúde da criança e do
