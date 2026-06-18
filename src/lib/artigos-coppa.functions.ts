@@ -1,11 +1,16 @@
 import { createServerFn } from "@tanstack/react-start";
 import { z } from "zod";
 
+// 1. Atualizado para incluir universidade, municipio e uf no coautor
 const coautorSchema = z.object({
   nome: z.string().trim().min(1).max(120),
   sobrenome: z.string().trim().min(1).max(120),
+  universidade: z.string().trim().min(1, "Informe a universidade do coautor").max(150),
+  municipio: z.string().trim().min(1, "Informe o município do coautor").max(100),
+  uf: z.string().trim().min(2, "UF inválida").max(2),
 });
 
+// 2. Atualizado para incluir universidade, municipio e uf no autor principal
 const submissaoSchema = z.object({
   titulo: z.string().trim().min(3).max(300),
   resumo: z.string().trim().max(60000).optional().default(""),
@@ -14,14 +19,19 @@ const submissaoSchema = z.object({
   autor_sobrenome: z.string().trim().min(1).max(120),
   autor_email: z.string().trim().email().max(255),
   autor_telefone: z.string().trim().max(30).optional().default(""),
+  autor_universidade: z.string().trim().min(1, "Informe a sua universidade").max(150),
+  autor_municipio: z.string().trim().min(1, "Informe o seu município").max(100),
+  autor_uf: z.string().trim().min(2, "UF inválida").max(2),
   coautores: z.array(coautorSchema).max(15).default([]),
   arquivo_url: z.string().trim().max(2000).optional().default(""),
   arquivo_nome: z.string().trim().max(255).optional().default(""),
 });
 
+// 3. Cabeçalho atualizado com as novas colunas para o Autor
 const CABECALHO = [
   "Data/Hora", "Tipo", "Título", "Autor", "E-mail", "Telefone",
-  "Coautores", "Conteúdo", "Arquivo URL", "Arquivo nome", "ID",
+  "Autor - Universidade", "Autor - Município", "Autor - UF",
+  "Coautores (Nome, Inst, Cidade/UF)", "Conteúdo", "Arquivo URL", "Arquivo nome", "ID",
 ];
 
 function sheetNameFor(label: string) {
@@ -36,7 +46,6 @@ async function getSheets() {
   const creds = JSON.parse(json);
   const auth = new google.auth.JWT({
     email: creds.client_email,
-    // ESSA LINHA É O QUE RESOLVE O ERRO 403 NO SERVIDOR:
     key: creds.private_key.replace(/\\n/g, '\n'), 
     scopes: ["https://www.googleapis.com/auth/spreadsheets"],
   });
@@ -69,6 +78,7 @@ export const enviarArtigoCoppa = createServerFn({ method: "POST" })
     if (!spreadsheetId) throw new Error("GOOGLE_SHEETS_ID ausente");
 
     // 1) Salva no banco de dados (Supabase)
+    // ATENÇÃO: Certifique-se de criar essas colunas na tabela do Supabase se for usá-las lá!
     const mod = await import("@/integrations/supabase/client.server");
     const supabaseAdmin: any = mod.supabaseAdmin;
     
@@ -81,7 +91,10 @@ export const enviarArtigoCoppa = createServerFn({ method: "POST" })
         autor_sobrenome: data.autor_sobrenome,
         autor_email: data.autor_email, 
         autor_telefone: data.autor_telefone || null,
-        coautores: data.coautores,
+        autor_universidade: data.autor_universidade, // Nova coluna
+        autor_municipio: data.autor_municipio,       // Nova coluna
+        autor_uf: data.autor_uf,                     // Nova coluna
+        coautores: data.coautores, // O objeto JSON aqui já vai conter os novos campos do coautor
         arquivo_url: data.arquivo_url || null, 
         arquivo_nome: data.arquivo_nome || null,
       })
@@ -90,13 +103,17 @@ export const enviarArtigoCoppa = createServerFn({ method: "POST" })
     if (insertErr) throw new Error(`Falha ao salvar no Supabase: ${insertErr.message}`);
 
     try {
-      // 2) Escreve na planilha do Google (Versão Completa)
+      // 2) Escreve na planilha do Google
       const sheetsApi = await getSheets();
       const sheetName = sheetNameFor(data.tipo_label);
       
       await ensureSheet(sheetsApi, spreadsheetId, sheetName);
       
-      const coautoresStr = data.coautores.map((c) => `${c.nome} ${c.sobrenome}`).join("; ");
+      // Formata os coautores incluindo a universidade e localidade de cada um
+      const coautoresStr = data.coautores
+        .map((c) => `${c.nome} ${c.sobrenome} (${c.universidade} - ${c.municipio}/${c.uf.toUpperCase()})`)
+        .join("; ");
+
       const row = [
         new Date(inserted!.created_at).toLocaleString("pt-BR", { timeZone: "America/Sao_Paulo" }),
         data.tipo_label, 
@@ -104,6 +121,9 @@ export const enviarArtigoCoppa = createServerFn({ method: "POST" })
         `${data.autor_nome} ${data.autor_sobrenome}`,
         data.autor_email, 
         data.autor_telefone || "",
+        data.autor_universidade, // Inserido na planilha
+        data.autor_municipio,    // Inserido na planilha
+        data.autor_uf.toUpperCase(), // Inserido na planilha
         coautoresStr, 
         data.resumo || "",
         data.arquivo_url || "", 
