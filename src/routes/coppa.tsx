@@ -24,19 +24,16 @@ import { enviarEmailInscricaoCoppa } from "@/lib/notificacoes.functions";
 const validarCPF = (cpf: string) => {
   const cleanCPF = cpf.replace(/\D/g, "");
 
-  // Verifica se tem 11 dígitos ou se todos os dígitos são iguais (ex: 111.111.111-11)
   if (cleanCPF.length !== 11 || /^(\d)\1+$/.test(cleanCPF)) return false;
 
   let soma = 0;
   let resto;
 
-  // Validação do 1º dígito verificador
   for (let i = 1; i <= 9; i++) soma += parseInt(cleanCPF.substring(i - 1, i)) * (11 - i);
   resto = (soma * 10) % 11;
   if (resto === 10 || resto === 11) resto = 0;
   if (resto !== parseInt(cleanCPF.substring(9, 10))) return false;
 
-  // Validação do 2º dígito verificador
   soma = 0;
   for (let i = 1; i <= 10; i++) soma += parseInt(cleanCPF.substring(i - 1, i)) * (12 - i);
   resto = (soma * 10) % 11;
@@ -71,7 +68,6 @@ const LABELS: Record<Categoria, string> = {
   Medico: "Médico",
 };
 
-// Schema de validação atualizado com refine para o CPF
 const baseSchema = z.object({
   nome_completo: z.string().trim().min(3, "Informe seu nome completo").max(150),
   cpf: z
@@ -118,7 +114,6 @@ function CoppaPage() {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    // O safeParse agora verificará a máscara E a validade real do CPF
     const baseParse = baseSchema.safeParse(form);
     if (!baseParse.success) return toast.error(baseParse.error.issues[0].message);
     
@@ -241,7 +236,8 @@ function CoppaPage() {
         </section>
       )}
 
-      <section className="container mx-auto px-4 pb-4">
+      {/* Adicionado mt-12 md:mt-16 aqui para afastar os cartões para baixo */}
+      <section className="container mx-auto px-4 pb-4 mt-12 md:mt-16">
         <div className="max-w-2xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
           {(Object.keys(LABELS) as Categoria[]).map((c) => (
             <Card key={c} className="text-center" style={{ boxShadow: "var(--shadow-card)" }}>
