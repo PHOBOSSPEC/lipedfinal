@@ -9,7 +9,7 @@ export const Route = createFileRoute("/trabalhos")({
   head: () => ({
     meta: [
       { title: "Trabalhos Científicos — Liga de Pediatria Unioeste" },
-      { name: "description", content: "Artigos científicos publicados pela Liga de Pediatria da Unioeste." },
+      { name: "description", content: "Trabalhos científicos publicados pela Liga de Pediatria da Unioeste." },
     ],
   }),
   component: ArtigosPage,
@@ -42,7 +42,7 @@ function ArtigosPage() {
   return (
     <div className="container mx-auto px-4 py-12">
       <div className="mb-8">
-        <h1 className="text-4xl font-bold text-primary">Artigos Científicos</h1>
+        <h1 className="text-4xl font-bold text-primary">Trabalhos Científicos</h1>
         <p className="text-muted-foreground mt-2">
           Produção científica da Liga de Pediatria da Unioeste.
         </p>
@@ -63,7 +63,7 @@ function ArtigosPage() {
       ) : filtrados.length === 0 ? (
         <Card className="border-dashed">
           <CardContent className="py-16 text-center text-muted-foreground">
-            {artigos.length === 0 ? "Nenhum artigo publicado ainda." : "Nenhum artigo encontrado para esta busca."}
+            {artigos.length === 0 ? "Nenhum trabalho publicado ainda." : "Nenhum trabalho encontrado para esta busca."}
           </CardContent>
         </Card>
       ) : (
