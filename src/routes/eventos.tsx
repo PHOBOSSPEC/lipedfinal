@@ -207,7 +207,7 @@ function InscricaoEvento({ evento, onClose }: { evento: Evento; onClose: () => v
           <p className="text-xs text-muted-foreground">A organização entrará em contato com os dados de pagamento.</p>
         )}
         <div className="space-y-1">
-          <Label className="text-xs">Comprovante PIX</Label>
+          <Label className="text-xs">Comprovante PIX?</Label>
           <Input type="file" accept="image/*,application/pdf" required
             onChange={(e) => setComprovante(e.target.files?.[0] ?? null)} />
         </div>
