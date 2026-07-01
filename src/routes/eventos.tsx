@@ -147,14 +147,21 @@ function InscricaoEvento({ evento, onClose }: { evento: Evento; onClose: () => v
     setConfirmando(true);
     try {
       if (comprovante) {
-        // Validação preventiva para arquivos virtuais / links do Google Drive
+        // 1. Bloqueio de arquivos virtuais do Google Drive (Tamanho 0)
         if (comprovante.size === 0) {
           throw new Error("Arquivo via Google Drive não suportado. Envie um arquivo salvo diretamente do seu celular ou computador.");
+        }
+
+        // 2. Bloqueio de arquivos gigantescos (Aumentado para 10MB)
+        const maxInBytes = 10 * 1024 * 1024; 
+        if (comprovante.size > maxInBytes) {
+          throw new Error("O comprovante é muito grande! Envie uma foto ou PDF de no máximo 10MB.");
         }
 
         const path = `evento-pag/${inscricao.id}-${Date.now()}-${comprovante.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
         const { error: upErr } = await supabase.storage.from("comprovantes").upload(path, comprovante);
         if (upErr) throw upErr;
+        
         const { error: rpcErr } = await (supabase as any).rpc("attach_payment_proof_evento", {
           _id: inscricao.id, _token: inscricao.upload_token, _url: path,
         });
@@ -163,7 +170,12 @@ function InscricaoEvento({ evento, onClose }: { evento: Evento; onClose: () => v
       setSuccess(true);
       toast.success("Pagamento informado! Aguarde confirmação.");
     } catch (err: any) {
-      toast.error(err.message ?? "Erro ao enviar comprovante.");
+      // Captura o erro clássico de interrupção abrupta da requisição web (CORS, AdBlock ou timeout)
+      if (err instanceof TypeError && err.message.includes("fetch")) {
+        toast.error("Erro de conexão com o servidor! Verifique se algum AdBlock está bloqueando a rede ou tente diminuir o arquivo.");
+      } else {
+        toast.error(err.message ?? "Erro ao enviar comprovante.");
+      }
     } finally { setConfirmando(false); }
   };
 
@@ -195,8 +207,8 @@ function InscricaoEvento({ evento, onClose }: { evento: Evento; onClose: () => v
           <p className="text-xs text-muted-foreground">A organização entrará em contato com os dados de pagamento.</p>
         )}
         <div className="space-y-1">
-          <Label className="text-xs">Comprovante PIX (opcional)</Label>
-          <Input type="file" accept="image/*,application/pdf"
+          <Label className="text-xs">Comprovante PIX</Label>
+          <Input type="file" accept="image/*,application/pdf" required
             onChange={(e) => setComprovante(e.target.files?.[0] ?? null)} />
         </div>
         <Button size="sm" disabled={confirmando} onClick={confirmarPagamento} className="w-full">
