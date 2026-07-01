@@ -34,7 +34,6 @@ const telMask = (v: string) => {
 const cpfMask = (v: string) => v.replace(/\D/g, "").slice(0, 11)
   .replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d)/, "$1.$2").replace(/(\d{3})(\d{1,2})$/, "$1-$2");
 
-// Schema atualizado: CPF agora é obrigatório e valida o tamanho da máscara (14 caracteres)
 const schema = z.object({
   nome_completo: z.string().trim().min(3, "Informe seu nome").max(150),
   email: z.string().trim().email("E-mail inválido").max(255),
@@ -122,7 +121,6 @@ function InscricaoEvento({ evento, onClose }: { evento: Evento; onClose: () => v
     if (!parsed.success) return toast.error(parsed.error.issues[0].message);
     setSubmitting(true);
     try {
-      // RPC atualizado para enviar o CPF já validado do Zod
       const { data, error } = await (supabase as any).rpc("criar_inscricao_evento", {
         _evento_id: evento.id,
         _nome: parsed.data.nome_completo,
@@ -149,6 +147,11 @@ function InscricaoEvento({ evento, onClose }: { evento: Evento; onClose: () => v
     setConfirmando(true);
     try {
       if (comprovante) {
+        // Validação preventiva para arquivos virtuais / links do Google Drive
+        if (comprovante.size === 0) {
+          throw new Error("Arquivo via Google Drive não suportado. Envie um arquivo salvo diretamente do seu celular ou computador.");
+        }
+
         const path = `evento-pag/${inscricao.id}-${Date.now()}-${comprovante.name.replace(/[^a-zA-Z0-9._-]/g, "_")}`;
         const { error: upErr } = await supabase.storage.from("comprovantes").upload(path, comprovante);
         if (upErr) throw upErr;
@@ -219,7 +222,6 @@ function InscricaoEvento({ evento, onClose }: { evento: Evento; onClose: () => v
           placeholder="(45) 99999-9999" required />
       </div>
       <div className="space-y-1">
-        {/* Input atualizado: Removido o "(opcional)" e adicionada a flag required */}
         <Label className="text-xs">CPF</Label>
         <Input value={form.cpf} onChange={(e) => setForm({ ...form, cpf: cpfMask(e.target.value) })}
           placeholder="000.000.000-00" required />
