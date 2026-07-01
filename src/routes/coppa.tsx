@@ -311,7 +311,7 @@ function CoppaPage() {
                     </div>
                   </div>
                   <div className="space-y-2">
-                    <Label htmlFor="pagcomp">Comprovante do PIX (opcional)</Label>
+                    <Label htmlFor="pagcomp">Comprovante do PIX (opcional, não envie pelo Drive)</Label>
                     <Input id="pagcomp" type="file" accept="image/*,application/pdf"
                       onChange={(e) => setPagComprovante(e.target.files?.[0] ?? null)} />
                   </div>
