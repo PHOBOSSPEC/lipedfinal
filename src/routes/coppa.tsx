@@ -23,7 +23,7 @@ import {
   CheckCircle2, 
   Copy, 
   FileText,
-  Building2
+  Building2 
 } from "lucide-react";
 import { toast } from "sonner";
 import { useSetting, DEFAULT_COPPA, type CoppaSettings } from "@/hooks/use-site-settings";
@@ -33,23 +33,18 @@ import { enviarEmailInscricaoCoppa } from "@/lib/notificacoes.functions";
 
 const validarCPF = (cpf: string) => {
   const cleanCPF = cpf.replace(/\D/g, "");
-
   if (cleanCPF.length !== 11 || /^(\d)\1+$/.test(cleanCPF)) return false;
-
   let soma = 0;
   let resto;
-
   for (let i = 1; i <= 9; i++) soma += parseInt(cleanCPF.substring(i - 1, i)) * (11 - i);
   resto = (soma * 10) % 11;
   if (resto === 10 || resto === 11) resto = 0;
   if (resto !== parseInt(cleanCPF.substring(9, 10))) return false;
-
   soma = 0;
   for (let i = 1; i <= 10; i++) soma += parseInt(cleanCPF.substring(i - 1, i)) * (12 - i);
   resto = (soma * 10) % 11;
   if (resto === 10 || resto === 11) resto = 0;
   if (resto !== parseInt(cleanCPF.substring(10, 11))) return false;
-
   return true;
 };
 
@@ -123,16 +118,13 @@ function CoppaPage() {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
     const baseParse = baseSchema.safeParse(form);
     if (!baseParse.success) return toast.error(baseParse.error.issues[0].message);
-    
     if (!form.categoria) return toast.error("Selecione uma categoria");
 
     let liga_parceira_nome: string | null = null;
     let crm: string | null = null;
     let comprovante_url: string | null = null;
-
     const cat = form.categoria as Categoria;
 
     if (cat === "LigaParceira") {
@@ -188,7 +180,6 @@ function CoppaPage() {
       }
       setSuccess(true);
       toast.success(pagComprovante ? "Comprovante enviado! Aguarde a confirmação." : "Pagamento informado!");
-      
       try {
         await enviarEmailInscricao({
           data: {
@@ -198,12 +189,9 @@ function CoppaPage() {
             valor: pagamento.valor,
           },
         });
-      } catch (e) {
-        console.error("Falha ao enviar e-mail de confirmação:", e);
-      }
-    } catch (err: any) {
-      toast.error(err.message ?? "Erro ao enviar comprovante.");
-    } finally { setConfirmando(false); }
+      } catch (e) { console.error("Falha ao enviar e-mail de confirmação:", e); }
+    } catch (err: any) { toast.error(err.message ?? "Erro ao enviar comprovante."); }
+    finally { setConfirmando(false); }
   };
 
   const copyPix = async () => {
@@ -231,6 +219,7 @@ function CoppaPage() {
         </div>
       </section>
 
+      {/* Highlights */}
       {settings.highlights.length > 0 && (
         <section className="container mx-auto px-4 py-12">
           <div className="grid gap-4 md:grid-cols-3">
@@ -246,7 +235,7 @@ function CoppaPage() {
         </section>
       )}
 
-      {/* Adicionado mt-12 md:mt-16 aqui para afastar os cartões para baixo */}
+      {/* Grid de Preços */}
       <section className="container mx-auto px-4 pb-4 mt-12 md:mt-16">
         <div className="max-w-2xl mx-auto grid grid-cols-2 md:grid-cols-4 gap-3">
           {(Object.keys(LABELS) as Categoria[]).map((c) => (
@@ -260,11 +249,11 @@ function CoppaPage() {
         </div>
       </section>
 
-      {/* SEÇÃO DOS TRÊS BLOCOS DE DESTAQUE */}
+      {/* SEÇÃO DOS TRÊS BLOCOS DE INFORMAÇÃO */}
       <section className="container mx-auto px-4 py-6">
         <div className="max-w-2xl mx-auto space-y-3">
           
-          {/* 1) Instituições Parceiras (Cor: rgb(238, 127, 15)) */}
+          {/* 1) Instituições Parceiras (Laranja) */}
           <Card 
             style={{ 
               borderColor: "rgb(238, 127, 15)", 
@@ -287,19 +276,19 @@ function CoppaPage() {
             </CardContent>
           </Card>
 
-          {/* 2) Programação do evento (Cor: rgb(163, 127, 141)) */}
+          {/* 2) Programação do evento (AZUL) */}
           <Card 
             style={{ 
-              borderColor: "rgb(163, 127, 141)", 
-              backgroundColor: "rgba(163, 127, 141, 0.12)",
+              borderColor: "rgb(37, 99, 235)", 
+              backgroundColor: "rgba(37, 99, 235, 0.08)",
               boxShadow: "var(--shadow-card)" 
             }}
           >
             <CardContent className="pt-5 pb-5 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-start gap-3">
-                <CalendarDays className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(163, 127, 141)" }} />
+                <CalendarDays className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(37, 99, 235)" }} />
                 <div>
-                  <p className="font-semibold text-base" style={{ color: "rgb(163, 127, 141)" }}>
+                  <p className="font-semibold text-base" style={{ color: "rgb(37, 99, 235)" }}>
                     Acesse a programação do evento!
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -313,19 +302,19 @@ function CoppaPage() {
             </CardContent>
           </Card>
 
-          {/* 3) Submissão de resumos (Cor: rgb(238, 127, 15)) */}
+          {/* 3) Submissão de resumos/Artigos (VERMELHO) */}
           <Card 
             style={{ 
-              borderColor: "rgb(238, 127, 15)", 
-              backgroundColor: "rgba(238, 127, 15, 0.08)",
+              borderColor: "rgb(220, 38, 38)", 
+              backgroundColor: "rgba(220, 38, 38, 0.08)",
               boxShadow: "var(--shadow-card)" 
             }}
           >
             <CardContent className="pt-5 pb-5 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-start gap-3">
-                <FileText className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(238, 127, 15)" }} />
+                <FileText className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(220, 38, 38)" }} />
                 <div>
-                  <p className="font-semibold text-base" style={{ color: "rgb(238, 127, 15)" }}>
+                  <p className="font-semibold text-base" style={{ color: "rgb(220, 38, 38)" }}>
                     Submeta aqui seu resumo simples!
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
@@ -336,7 +325,7 @@ function CoppaPage() {
               <Button 
                 asChild 
                 variant="outline" 
-                className="border-[rgb(238,127,15)] text-[rgb(238,127,15)] hover:bg-[rgba(238,127,15,0.1)]"
+                className="border-[rgb(220,38,38)] text-[rgb(220,38,38)] hover:bg-[rgba(220,38,38,0.1)]"
               >
                 <Link to="/enviar-artigo">Enviar resumo</Link>
               </Button>
@@ -346,6 +335,7 @@ function CoppaPage() {
         </div>
       </section>
 
+      {/* Formulário de Inscrição */}
       <section className="container mx-auto px-4 pb-20 pt-4">
         <div className="max-w-2xl mx-auto">
           <Card className="border-border" style={{ boxShadow: "var(--shadow-card)" }}>
@@ -362,9 +352,7 @@ function CoppaPage() {
                 <div className="mt-8 text-center py-8">
                   <CheckCircle2 className="mx-auto h-16 w-16 text-accent" />
                   <h3 className="mt-4 text-xl font-bold text-primary">Inscrição registrada!</h3>
-                  <p className="text-muted-foreground mt-2">
-                    A LIPED irá verificar seu pagamento e confirmar sua inscrição.
-                  </p>
+                  <p className="text-muted-foreground mt-2">A LIPED irá verificar seu pagamento e confirmar sua inscrição.</p>
                   <Button variant="outline" className="mt-6" onClick={resetForm}>Nova inscrição</Button>
                 </div>
               ) : pagamento ? (
