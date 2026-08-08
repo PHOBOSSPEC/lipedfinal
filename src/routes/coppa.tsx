@@ -14,7 +14,17 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { CalendarDays, MapPin, Sparkles, CreditCard, Loader2, CheckCircle2, Copy, FileText } from "lucide-react";
+import { 
+  CalendarDays, 
+  MapPin, 
+  Sparkles, 
+  CreditCard, 
+  Loader2, 
+  CheckCircle2, 
+  Copy, 
+  FileText,
+  Building2
+} from "lucide-react";
 import { toast } from "sonner";
 import { useSetting, DEFAULT_COPPA, type CoppaSettings } from "@/hooks/use-site-settings";
 import { enviarEmailInscricaoCoppa } from "@/lib/notificacoes.functions";
@@ -250,20 +260,89 @@ function CoppaPage() {
         </div>
       </section>
 
+      {/* SEÇÃO DOS TRÊS BLOCOS DE DESTAQUE */}
       <section className="container mx-auto px-4 py-6">
-        <div className="max-w-2xl mx-auto">
-          <Card className="border-accent/40 bg-accent/5">
+        <div className="max-w-2xl mx-auto space-y-3">
+          
+          {/* 1) Instituições Parceiras (Cor: rgb(238, 127, 15)) */}
+          <Card 
+            style={{ 
+              borderColor: "rgb(238, 127, 15)", 
+              backgroundColor: "rgba(238, 127, 15, 0.08)",
+              boxShadow: "var(--shadow-card)" 
+            }}
+          >
             <CardContent className="pt-5 pb-5 flex flex-wrap items-center justify-between gap-3">
               <div className="flex items-start gap-3">
-                <FileText className="h-5 w-5 text-accent-foreground mt-1" />
+                <Building2 className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(238, 127, 15)" }} />
                 <div>
-                  <p className="font-semibold text-primary">Submeta aqui seu resumo simples!</p>
-                  <p className="text-xs text-muted-foreground">Envie seu trabalho científico para análise.</p>
+                  <p className="font-semibold text-base" style={{ color: "rgb(238, 127, 15)" }}>
+                    Confira as Instituições parceiras!
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Inscreva-se e garanta já seu desconto.
+                  </p>
                 </div>
               </div>
-              <Button asChild variant="outline"><Link to="/enviar-artigo">Enviar resumo</Link></Button>
             </CardContent>
           </Card>
+
+          {/* 2) Programação do evento (Cor: rgb(163, 127, 141)) */}
+          <Card 
+            style={{ 
+              borderColor: "rgb(163, 127, 141)", 
+              backgroundColor: "rgba(163, 127, 141, 0.12)",
+              boxShadow: "var(--shadow-card)" 
+            }}
+          >
+            <CardContent className="pt-5 pb-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <CalendarDays className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(163, 127, 141)" }} />
+                <div>
+                  <p className="font-semibold text-base" style={{ color: "rgb(163, 127, 141)" }}>
+                    Acesse a programação do evento!
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Conheça os palestrantes e os temas que serão abordados.{" "}
+                    <span className="font-medium text-foreground/80">
+                      ATENÇÃO: programação sujeita a alterações.
+                    </span>
+                  </p>
+                </div>
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* 3) Submissão de resumos (Cor: rgb(238, 127, 15)) */}
+          <Card 
+            style={{ 
+              borderColor: "rgb(238, 127, 15)", 
+              backgroundColor: "rgba(238, 127, 15, 0.08)",
+              boxShadow: "var(--shadow-card)" 
+            }}
+          >
+            <CardContent className="pt-5 pb-5 flex flex-wrap items-center justify-between gap-3">
+              <div className="flex items-start gap-3">
+                <FileText className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(238, 127, 15)" }} />
+                <div>
+                  <p className="font-semibold text-base" style={{ color: "rgb(238, 127, 15)" }}>
+                    Submeta aqui seu resumo simples!
+                  </p>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Envie seu trabalho científico para análise.
+                  </p>
+                </div>
+              </div>
+              <Button 
+                asChild 
+                variant="outline" 
+                className="border-[rgb(238,127,15)] text-[rgb(238,127,15)] hover:bg-[rgba(238,127,15,0.1)]"
+              >
+                <Link to="/enviar-artigo">Enviar resumo</Link>
+              </Button>
+            </CardContent>
+          </Card>
+
         </div>
       </section>
 
