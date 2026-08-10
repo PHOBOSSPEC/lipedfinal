@@ -266,7 +266,7 @@ function CoppaPage() {
                 <Building2 className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(238, 127, 15)" }} />
                 <div>
                   <p className="font-semibold text-base" style={{ color: "rgb(238, 127, 15)" }}>
-                    Confira as Instituições parceiras!
+                    Confira as Instituições parceiras! (em  breve)
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Inscreva-se e garanta já seu desconto.
@@ -289,7 +289,7 @@ function CoppaPage() {
                 <CalendarDays className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(37, 99, 235)" }} />
                 <div>
                   <p className="font-semibold text-base" style={{ color: "rgb(37, 99, 235)" }}>
-                    Acesse a programação do evento!
+                    Acesse a programação do evento! (em breve)
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Conheça os palestrantes e os temas que serão abordados.{" "}
