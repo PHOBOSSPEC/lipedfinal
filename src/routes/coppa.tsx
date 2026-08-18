@@ -318,7 +318,7 @@ function CoppaPage() {
                     Submeta aqui seu resumo simples!
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Envie seu trabalho científico para análise.
+                    ATENÇÃO: Prazo de submissão prorrogado para o dia 21/08 às 23h59.
                   </p>
                 </div>
               </div>
