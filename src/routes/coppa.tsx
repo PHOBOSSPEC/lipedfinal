@@ -266,13 +266,22 @@ function CoppaPage() {
                 <Building2 className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(238, 127, 15)" }} />
                 <div>
                   <p className="font-semibold text-base" style={{ color: "rgb(238, 127, 15)" }}>
-                    Confira as Instituições parceiras! (em  breve)
+                    Confira as Instituições parceiras!
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Inscreva-se e garanta já seu desconto.
                   </p>
                 </div>
               </div>
+              <Button 
+                asChild 
+                variant="outline" 
+                className="border-[rgb(238,127,15)] text-[rgb(238,127,15)] hover:bg-[rgba(238,127,15,0.1)]"
+              >
+                <a href="/Ligas+CAs%20parceiros%20.pdf" target="_blank" rel="noopener noreferrer">
+                  Ver Instituições
+                </a>
+              </Button>
             </CardContent>
           </Card>
 
@@ -289,7 +298,7 @@ function CoppaPage() {
                 <CalendarDays className="h-5 w-5 mt-1 shrink-0" style={{ color: "rgb(37, 99, 235)" }} />
                 <div>
                   <p className="font-semibold text-base" style={{ color: "rgb(37, 99, 235)" }}>
-                    Acesse a programação do evento! (em breve)
+                    Acesse a programação do evento!
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Conheça os palestrantes e os temas que serão abordados.{" "}
@@ -299,6 +308,15 @@ function CoppaPage() {
                   </p>
                 </div>
               </div>
+              <Button 
+                asChild 
+                variant="outline" 
+                className="border-[rgb(37,99,235)] text-[rgb(37,99,235)] hover:bg-[rgba(37,99,235,0.1)]"
+              >
+                <a href="/Programa%C3%A7%C3%A3o%20III%20COPPA.pdf" target="_blank" rel="noopener noreferrer">
+                  Ver Programação
+                </a>
+              </Button>
             </CardContent>
           </Card>
 
