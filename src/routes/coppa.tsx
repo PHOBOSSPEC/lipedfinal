@@ -302,9 +302,6 @@ function CoppaPage() {
                   </p>
                   <p className="text-xs text-muted-foreground mt-0.5">
                     Conheça os palestrantes e os temas que serão abordados.{" "}
-                    <span className="font-medium text-foreground/80">
-                      ATENÇÃO: programação sujeita a alterações.
-                    </span>
                   </p>
                 </div>
               </div>
