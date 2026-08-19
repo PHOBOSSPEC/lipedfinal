@@ -278,7 +278,7 @@ function CoppaPage() {
                 variant="outline" 
                 className="border-[rgb(238,127,15)] text-[rgb(238,127,15)] hover:bg-[rgba(238,127,15,0.1)]"
               >
-                <a href="/Ligas+CAs%20parceiros%20.pdf" target="_blank" rel="noopener noreferrer">
+                <a href="/parceiros.pdf" target="_blank" rel="noopener noreferrer">
                   Ver Instituições
                 </a>
               </Button>
